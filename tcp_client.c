@@ -33,26 +33,35 @@ int main() {
 	/* check for error with the connection */
 	if (connection_status == -1) {
 		printf("There was an error making a connection to the remote socket \n\n");
+		persist = 0;
 	}
 	
-	/* assumes that the message will be smaller than 256 bytes */
-	char client_message[256];
-	printf(">");
-	fgets(client_message, 256, stdin);
-	remove_character(client_message, '\n');
-
-	/* when the user doesn't input exit */
-	if (strcmp(client_message, "exit") != 0) {
-
-		/* send data to the server */
-		send(network_socket, client_message, sizeof(client_message), 0);
-
-		/* recieve data from the server */
-		char server_response[256];
-		recv(network_socket, &server_response, sizeof(server_response), 0);
-		
-		/* print data we receive from server response */
-		printf("The server sent the data: %s \n", server_response);	
+	while(persist) {
+		/* assumes that the message will be smaller than 256 bytes */
+		//char* client_message = malloc(256*sizeof(char));
+		char client_message[256];
+		printf(">");
+		fgets(client_message, 256, stdin);
+		remove_character(client_message, '\n');
+	
+		/* when the user doesn't input exit */
+		if (strcmp(client_message, "exit") != 0) {
+			/* send data to the server */
+			send(network_socket, client_message, sizeof(client_message), 0);
+	
+			/* recieve data from the server */
+			char server_response[256];
+			//char* server_response = malloc(256*sizeof(char));
+			recv(network_socket, &server_response, sizeof(server_response), 0);
+			
+			/* print data we receive from server response */
+			printf("The server sent the data: %s \n", server_response);
+			//free(server_response);	
+		} else {
+			persist = 0;
+		}
+	
+		//free(client_message);
 	}
 
 	/* close the socket  */

@@ -9,6 +9,9 @@
 
 /* last 5 digits of uid */
 const unsigned int port = 70196;
+const int buffer_size = 100;
+
+char **tokenize(char *message);
 
 /* SERVER */
 int main() {
@@ -39,11 +42,47 @@ int main() {
 	recv(client_socket, &client_message, sizeof(client_message), 0);
 	printf("recieved:\"%s\" from the server \n", client_message);
 
+	/* tokenize the command from the client */
+	char **tokens = tokenize(client_message);
+	printf("%s", tokens[0]);
+	/* run the command from the client */	
+
 	/* send message */
 	send(client_socket, server_message, sizeof(server_message), 0);
 
-	/* close the socket */
+	/* close the client socket */
+	close(client_socket);
+
+	/* close the server socket */
 	close(server_socket);
 
 	return 0;
+}
+
+/**
+ * Creates and returns an array of strings which are the shell commands.
+ *
+ * char *message: the message sent to the server to be tokenized.
+ * char *delim: the delimeter to tokenize the message on.
+ */
+char **tokenize(char *message) {
+	int buffer_size = 100;
+	char *new_message = message;
+	//char *context_ptr;
+	char *command = strtok(new_message, " ");
+	char **args = (char**) malloc(buffer_size*sizeof(char *));
+
+	int i;
+	i = 0;
+	while(command != NULL) {
+		printf("%s", command);
+		args[i] = command;
+		command = strtok(NULL, " ");
+		i++;
+		if(i > buffer_size) {
+			buffer_size += buffer_size;
+			args = (char **) realloc(args, buffer_size * sizeof(char *));
+		}
+	}
+	return args;
 }
