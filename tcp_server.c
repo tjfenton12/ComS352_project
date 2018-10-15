@@ -16,7 +16,7 @@ char **tokenize(char *message);
 
 /* SERVER */
 int main() {
-	int persist = 1;
+	int global_persist = 1;
 	char server_message[] = "You have reached the server!";
 
 	/* create the server socket */
@@ -34,33 +34,53 @@ int main() {
 	
 	/* listen for connections */
 	listen(server_socket, 10);
-
-	/* accept a client connection */
-	char client_message[256];
-	int client_socket;
-	client_socket = accept(server_socket, NULL, NULL);
-
-	/* recieve message */
-	recv(client_socket, &client_message, sizeof(client_message), 0);
-	printf("recieved:<%s> from the client. \n", client_message);
-
-	/* tokenize the command from the client */
-	char **tokens;
-       	tokens = tokenize(client_message);
-
-	/* run the command from the client */	
-	int error;
-	error = execvp(tokens[0], tokens);
-	if(error == -1){
-		char execvp_msg_failure[] = "That command was not found";
-		send(client_socket, execvp_msg_failure, sizeof(execvp_msg_failure), 0);
+	
+	while(global_persist) {
+		/* accept a client connection */
+		int local_persist = 1;
+		char client_message[256];
+		int client_socket;
+		client_socket = accept(server_socket, NULL, NULL);
+		
+		int pid;
+		pid = fork();
+		if(pid == 0) {
+			while(local_persist) {
+			/* recieve message */
+			recv(client_socket, &client_message, sizeof(client_message), 0);
+			printf("recieved:<%s> from the client. \n", client_message);
+			
+			if(strcmp(client_message, "exit") == 0) {
+				local_persist = 0;
+				printf("Exiting Process.");
+		
+			} else {
+				/* tokenize the command from the client */
+				char **tokens;
+			       	tokens = tokenize(client_message);
+			
+				/* change the stderr and stdout to the client socket */
+				dup2(client_socket, STDOUT_FILENO);
+				dup2(client_socket, STDERR_FILENO);
+			
+				/* run the command from the client */	
+				int error;
+				error = execvp(tokens[0], tokens);
+				if(error == -1){
+					char execvp_msg_failure[] = "That command was not found";
+					send(client_socket, execvp_msg_failure, sizeof(execvp_msg_failure), 0);
+				} else {
+					/* send message */
+					send(client_socket, server_message, sizeof(server_message), 0);
+				}
+			}
+			}
+		} /* parent process */
+	       	else {
+			/* close client_socket */
+			close(client_socket);
+		}
 	}
-
-	/* send message */
-	send(client_socket, server_message, sizeof(server_message), 0);
-
-	/* close the client socket */
-	close(client_socket);
 
 	/* close the server socket */
 	close(server_socket);

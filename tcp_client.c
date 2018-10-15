@@ -27,6 +27,7 @@ int main() {
 	server_address.sin_port = htons(PORT);
 	server_address.sin_addr.s_addr = INADDR_ANY;
 
+	printf("Connecting to server.\n");
 	/* call connect function */
 	int connection_status = connect(network_socket, (struct sockaddr *) &server_address, sizeof(server_address));
 
@@ -34,11 +35,12 @@ int main() {
 	if (connection_status == -1) {
 		printf("There was an error making a connection to the remote socket \n\n");
 		persist = 0;
+	} else {
+		printf("Connected to server.\n");
 	}
 	
-	while(persist) {
+	while(persist) {	
 		/* assumes that the message will be smaller than 256 bytes */
-		//char* client_message = malloc(256*sizeof(char));
 		char client_message[256];
 		printf(">");
 		fgets(client_message, 256, stdin);
@@ -48,20 +50,20 @@ int main() {
 		if (strcmp(client_message, "exit") != 0) {
 			/* send data to the server */
 			send(network_socket, client_message, sizeof(client_message), 0);
-	
+			
+			printf("The server sent the following data: \n");	
 			/* recieve data from the server */
 			char server_response[256];
-			//char* server_response = malloc(256*sizeof(char));
-			recv(network_socket, &server_response, sizeof(server_response), 0);
-			
-			/* print data we receive from server response */
-			printf("The server sent the data: %s \n", server_response);
-			//free(server_response);	
+			read(network_socket, &server_response, sizeof(server_response));
+			printf("%s", server_response);
+			//fflush(stdout);
+			printf("\n");
+
 		} else {
+			send(network_socket, client_message, sizeof(client_message), 0);
 			persist = 0;
 		}
-	
-		//free(client_message);
+		printf("restarting loop.\n");
 	}
 
 	/* close the socket  */
