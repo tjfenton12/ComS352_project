@@ -66,6 +66,7 @@ int main() {
 				/* run the command from the client */	
 				int error;
 				error = execvp(tokens[0], tokens);
+				sleep(1);
 				if(error == -1){
 					char execvp_msg_failure[] = "That command was not found";
 					send(client_socket, execvp_msg_failure, sizeof(execvp_msg_failure), 0);

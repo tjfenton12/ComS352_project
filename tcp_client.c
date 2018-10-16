@@ -54,9 +54,10 @@ int main() {
 			printf("The server sent the following data: \n");	
 			/* recieve data from the server */
 			char server_response[256];
-			read(network_socket, &server_response, sizeof(server_response));
-			printf("%s", server_response);
-			//fflush(stdout);
+			while(read(network_socket, &server_response, sizeof(server_response)) != 0) {
+				printf("%s", server_response);
+			}
+			fflush(stdout);
 			printf("\n");
 
 		} else {
