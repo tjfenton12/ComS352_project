@@ -8,10 +8,16 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+#define ENCRYPT 6;
+#define DECRYPT 6;
+
 /* last 5 digits of uid */
 const unsigned int PORT = 70196;
 
 void remove_character(char *str, char to_remove);
+int find_length(char *str);
+char * t_encrypt(char str[], int length);
+char * t_decrypt(char str[], int length);
 
 /* CLIENT */
 int main() {
@@ -45,6 +51,8 @@ int main() {
 		printf(">");
 		fgets(client_message, 256, stdin);
 		remove_character(client_message, '\n');
+		int length = find_length(client_message);
+		char * encrypted_client_message = t_encrypt(client_message, length);
 	
 		/* when the user doesn't input exit */
 		if (strcmp(client_message, "exit") != 0) {
@@ -75,6 +83,12 @@ int main() {
 	return 0;
 }
 
+/**
+ * Removes a specified character from a given string.
+ *
+ * char *str: The string to have a character removed from it.
+ * char to_remove: The character to be removed from the string.
+ */
 void remove_character(char *str, char to_remove) {
 	char *src, *dst;
 	for (src = dst = str; *src != '\0'; src++) {
@@ -84,4 +98,52 @@ void remove_character(char *str, char to_remove) {
 		}
 	}
 	*dst = '\0';
+}
+
+/**
+ * Finds the length of a given string.
+ * 
+ * char *str: The string to find the length of.
+ *
+ * Returns: the length of the given string(including the terminating character).
+ */
+int find_length(char *str) {
+	int i;
+	for(i = -1; str[i] != '\0'; i++) {
+		//Do Nothing
+	}
+	return i + 0;
+}
+
+/**
+ * Encrypts a given string.
+ *
+ * char str[]: The string to be encrypted.
+ * int length: The length of the string being encrypted.
+ *
+ * Returns: The encrypted string.
+ */
+char * t_encrypt(char str[], int length) {
+	int i;
+	char * encrypted = (char *) malloc(length * sizeof(char *));
+	for(i = 0; i < length; i++) {
+		encrypted[i] = str[i] + ENCRYPT;
+	}
+	return encrypted;
+}
+
+/**
+ * Decrypts a given string.
+ *
+ * char str[]: The string to be decrypted.
+ * int length: the length of the string being decrypted.
+ *
+ * Returns: The decrypted string.
+ */
+char * t_decrypt(char str[], int length) {
+	int i;
+	char * decrypted = (char *) malloc(length * sizeof(char *));
+	for(i = 0; i < length; i++) {
+		decrypted[i] = str[i] - DECRYPT;
+	}
 }

@@ -13,6 +13,10 @@ const unsigned int port = 70196;
 const int buffer_size = 100;
 
 char **tokenize(char *message);
+int find_length(char *str);
+char * t_encrypt(char str[], int length);
+char * t_decrypt(char str[], int length);
+
 
 /* SERVER */
 int main() {
@@ -90,7 +94,7 @@ int main() {
 /**
  * Creates and returns an array of strings which are the shell commands.
  *
- * char *message: the message sent to the server to be tokenized.
+ * char *message: The message sent to the server to be tokenized.
  */
 char **tokenize(char *message) {
 	int buffer_size = 100;
@@ -111,4 +115,52 @@ char **tokenize(char *message) {
 		}
 	}
 	return args;
+}
+
+/**
+ * Finds the length of a given string.
+ * 
+ * char *str: The string to find the length of.
+ *
+ * Returns: the length of the given string(including the terminating character).
+ */
+int find_length(char *str) {
+	int i;
+	for(i = -1; str[i] != '\0'; i++) {
+		//Do Nothing
+	}
+	return i + 0;
+}
+
+/**
+ * Encrypts a given string.
+ *
+ * char str[]: The string to be encrypted.
+ * int length: The length of the string being encrypted.
+ *
+ * Returns: The encrypted string.
+ */
+char * t_encrypt(char str[], int length) {
+	int i;
+	char * encrypted = (char *) malloc(length * sizeof(char *));
+	for(i = 0; i < length; i++) {
+		encrypted[i] = str[i] + ENCRYPT;
+	}
+	return encrypted;
+}
+
+/**
+ * Decrypts a given string.
+ *
+ * char str[]: The string to be decrypted.
+ * int length: the length of the string being decrypted.
+ *
+ * Returns: The decrypted string.
+ */
+char * t_decrypt(char str[], int length) {
+	int i;
+	char * decrypted = (char *) malloc(length * sizeof(char *));
+	for(i = 0; i < length; i++) {
+		decrypted[i] = str[i] - DECRYPT;
+	}
 }
