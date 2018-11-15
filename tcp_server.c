@@ -8,6 +8,9 @@
 #include <unistd.h>
 #include <string.h>
 
+#define ENCRYPT 6
+#define DECRYPT 6
+
 /* last 5 digits of uid */
 const unsigned int port = 70196;
 const int buffer_size = 100;
@@ -53,15 +56,17 @@ int main() {
 				char client_message[256];
 				recv(client_socket, &client_message, sizeof(client_message), 0);
 				printf("recieved:<%s> from the client. \n", client_message);
+				int length = find_length(client_message);
+				char decrypted_client_message = t_decrypt(client_message, length);
 				
-				if(strcmp(client_message, "exit") == 0) {
+				if(strcmp(decrypted_client_message, "exit") == 0) {
 					//local_persist = 0;
 					printf("Exiting Process.");
 			
 				} else {
 					/* tokenize the command from the client */
 					char **tokens;
-				       	tokens = tokenize(client_message);
+				       	tokens = tokenize(decrypted_client_message);
 				
 					/* change the stderr and stdout to the client socket */
 					dup2(client_socket, STDOUT_FILENO);

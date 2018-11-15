@@ -8,8 +8,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#define ENCRYPT 6;
-#define DECRYPT 6;
+#define ENCRYPT 6
+#define DECRYPT 6
 
 /* last 5 digits of uid */
 const unsigned int PORT = 70196;
@@ -22,7 +22,6 @@ char * t_decrypt(char str[], int length);
 /* CLIENT */
 int main() {
 	int persist = 1;
-	
 	while(persist) {	
 		/* define a socket */
 		int network_socket;
