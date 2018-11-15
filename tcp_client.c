@@ -53,12 +53,12 @@ int main() {
 		int length = find_length(client_message);
 		char * encrypted_client_message = (char *) malloc(length);
 		encrypted_client_message = t_encrypt(client_message, length);
-		printf("%s\n", encrypted_client_message);
+		//printf("%s\n", encrypted_client_message);
 	
 		/* when the user doesn't input exit */
 		if (strcmp(client_message, "exit") != 0) {
 			/* send data to the server */
-			ssize_t size = send(network_socket, client_message, sizeof(encrypted_client_message), 0);
+			ssize_t size = send(network_socket, encrypted_client_message, sizeof(encrypted_client_message), 0);
 
 			printf("The server sent the following data: \n");	
 			/* recieve data from the server */
@@ -110,10 +110,10 @@ void remove_character(char *str, char to_remove) {
  */
 int find_length(char *str) {
 	int i;
-	for(i = -1; str[i] != '\0'; i++) {
+	for(i = 0; str[i] != '\0'; i++) {
 		//Do Nothing
 	}
-	return i + 0;
+	return i + 1;
 }
 
 /**

