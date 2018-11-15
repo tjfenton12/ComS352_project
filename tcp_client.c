@@ -51,12 +51,14 @@ int main() {
 		fgets(client_message, 256, stdin);
 		remove_character(client_message, '\n');
 		int length = find_length(client_message);
-		char * encrypted_client_message = t_encrypt(client_message, length);
+		char * encrypted_client_message = (char *) malloc(sizeof(char *) * length);
+		encrypted_client_message = t_encrypt(client_message, length);
+		printf("%s\n", encrypted_client_message);
 	
 		/* when the user doesn't input exit */
 		if (strcmp(client_message, "exit") != 0) {
 			/* send data to the server */
-			ssize_t size = send(network_socket, client_message, sizeof(client_message), 0);
+			ssize_t size = send(network_socket, client_message, sizeof(encrypted_client_message), 0);
 
 			printf("The server sent the following data: \n");	
 			/* recieve data from the server */
