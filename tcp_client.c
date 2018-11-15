@@ -51,7 +51,7 @@ int main() {
 		fgets(client_message, 256, stdin);
 		remove_character(client_message, '\n');
 		int length = find_length(client_message);
-		char * encrypted_client_message = (char *) malloc(sizeof(char *) * length);
+		char * encrypted_client_message = (char *) malloc(length);
 		encrypted_client_message = t_encrypt(client_message, length);
 		printf("%s\n", encrypted_client_message);
 	

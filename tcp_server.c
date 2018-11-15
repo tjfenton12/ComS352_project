@@ -57,7 +57,7 @@ int main() {
 				recv(client_socket, &client_message, sizeof(client_message), 0);
 				printf("recieved:<%s> from the client. \n", client_message);
 				int length = find_length(client_message);
-				char * decrypted_client_message = (char *) malloc(sizeof(char *) * length);
+				char * decrypted_client_message = (char *) malloc(length);
 				decrypted_client_message = t_decrypt(client_message, length);
 				
 				if(strcmp(client_message, "exit") == 0) {
