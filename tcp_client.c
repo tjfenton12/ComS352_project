@@ -168,6 +168,7 @@ int main() {
 
 	}
 
+	free(history);
 	return 0;
 }
 
@@ -179,6 +180,7 @@ int main() {
  */
 void remove_character(char *str, char to_remove) {
 	char *src, *dst;
+
 	for (src = dst = str; *src != '\0'; src++) {
 		*dst = *src;
 		if (*dst != to_remove) {
@@ -197,6 +199,7 @@ void remove_character(char *str, char to_remove) {
  */
 int find_length(char *str) {
 	int i;
+
 	for(i = 0; str[i] != '\0'; i++) {
 		//Do Nothing
 	}
@@ -213,6 +216,7 @@ int find_length(char *str) {
  */
 char * t_encrypt(char str[], int length) {
 	int i;
+
 	char *encrypted = (char *) malloc(length * sizeof(char *));
 	for(i = 0; i < length; i++) {
 		encrypted[i] = str[i] + ENCRYPT;
@@ -230,6 +234,7 @@ char * t_encrypt(char str[], int length) {
  */
 char * t_decrypt(char str[], int length) {
 	int i;
+
 	char *decrypted = (char *) malloc(length * sizeof(char *));
 	for(i = 0; i < length; i++) {
 		decrypted[i] = str[i] - DECRYPT;
@@ -277,9 +282,34 @@ char * peek_command(int command, history_queue *history) {
 	return NULL;
 }
 
+/**
+ * Helper function to print the command history.
+ */
 void print_history(history_queue *history) {
 	int i;
+
 	for(i = 0; i < history->tail; i++) {
-		printf("%s\n", history->queue[i]); 
+		printf("%d: %s\n", i, history->queue[i]); 
 	}
+}
+
+/**
+ * Looks to see if semicolons exist in the provided string.
+ *
+ * char *str: The string to scan for semicolons.
+ * int length: The length of the provided string.
+ *
+ * returns: The number of semicolons which were found.
+ */
+int find_semicolons(char *str, int length) {
+	int i, count;
+
+	count = 0;
+	for(i = 0; i < length; i++) {
+		if(str[i] == ';') {
+			count++;
+		}
+	}
+
+	return count;
 }
