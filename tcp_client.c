@@ -14,14 +14,33 @@
 /* last 5 digits of uid */
 const unsigned int PORT = 70196;
 
+/**
+ * Structure that holds:
+ * 	an integer representation of the tail of the queue
+ * 	the queue
+ */
+typedef struct history_queue {
+	int tail;
+	char *queue[10];
+} history_queue;
+
 void remove_character(char *str, char to_remove);
 int find_length(char *str);
 char * t_encrypt(char str[], int length);
 char * t_decrypt(char str[], int length);
+void add_command(char *addition, history_queue *history);
+char * peek_command(int command, history_queue *history);
+void print_history(history_queue *history);
 
 /* CLIENT */
 int main() {
-	int persist = 1;
+	history_queue *history;
+	int persist;
+
+	history = (history_queue *) malloc(sizeof(history_queue));
+	history->tail = 0;
+	persist = 1;
+
 	while(persist) {	
 		/* define a socket */
 		int network_socket;
@@ -46,17 +65,89 @@ int main() {
 		}
 		
 		/* assumes that the message will be smaller than 256 bytes */
-		char client_message[256];
+		char *client_message = (char *) malloc(256);
 		printf(">");
 		fgets(client_message, 256, stdin);
 		remove_character(client_message, '\n');
 		int length = find_length(client_message);
-		char * encrypted_client_message = (char *) malloc(length);
+		char *encrypted_client_message = (char *) malloc(length);
 		encrypted_client_message = t_encrypt(client_message, length);
-		//printf("%s\n", encrypted_client_message);
-	
-		/* when the user doesn't input exit */
-		if (strcmp(client_message, "exit") != 0) {
+
+		/* if the client message is "history" */
+		if (strcmp(client_message, "history") == 0) {
+			print_history(history);
+			add_command(client_message, history);
+		} 
+		/* if the client message starts with '!' and is length 2 */
+		else if ((client_message[0] == '!') && ((find_length(client_message) - 1) == 2)) {
+			char char_test = client_message[1];
+			int int_test = client_message[1] - '0';
+			/* if second character is '!' */
+			if (char_test == '!') {
+				/* if the most recent command is "history" */
+				if(strcmp(peek_command(1, history), "history") == 0) {
+					add_command(peek_command(1, history), history);
+					print_history(history);
+				} else {
+					add_command(peek_command(1, history), history);
+					int command_length = find_length(peek_command(1, history));
+					char * command = (char *) malloc(length);
+					command = peek_command(1, history);
+					char * encrypted_command = (char *) malloc(command_length);
+					encrypted_command = t_encrypt(command, command_length);
+					/* send data to the server */
+					ssize_t size = send(network_socket, encrypted_command, sizeof(encrypted_command), 0);
+
+					printf("The server sent the following data: \n");	
+					/* recieve data from the server */
+					char server_response[256];
+					while(read(network_socket, &server_response, sizeof(server_response)) != 0) {
+						printf("%s", server_response);
+					}
+					fflush(stdout);
+					printf("\n");
+				}
+			}
+			/* if second character is a valid number between 1 and 10 */
+			else if ((int_test > 0) && (int_test < 11)) {
+				/* if the most recent command is "history" */
+				if(strcmp(peek_command(int_test, history), "history") == 0) {
+					add_command(peek_command(int_test, history), history);
+					print_history(history);
+				} else {
+					printf("%d\n", int_test); 
+					add_command(peek_command(int_test, history), history);
+					int command_length = find_length(peek_command(int_test, history));
+					char * command = (char *) malloc(length);
+					command = peek_command(int_test, history);
+					char * encrypted_command = (char *) malloc(command_length);
+					encrypted_command = t_encrypt(command, command_length);
+
+					/* send data to the server */
+					ssize_t size = send(network_socket, encrypted_command, sizeof(encrypted_command), 0);
+
+					printf("The server sent the following data: \n");	
+					/* recieve data from the server */
+					char server_response[256];
+					while(read(network_socket, &server_response, sizeof(server_response)) != 0) {
+						printf("%s", server_response);
+					}
+					fflush(stdout);
+					printf("\n");
+				}
+			}
+		} 
+		/* if client message is exit */
+		else if (strcmp(client_message, "exit") == 0) {
+			persist = 0;
+		}
+		/* if client message is empty */
+		else if (strcmp(client_message, "") == 0) {
+			printf("Nothing to send. Please try again.\n");
+		}
+		/* if client message is not a custom command */
+		else {
+			add_command(client_message, history);
 			/* send data to the server */
 			ssize_t size = send(network_socket, encrypted_client_message, sizeof(encrypted_client_message), 0);
 
@@ -64,16 +155,12 @@ int main() {
 			/* recieve data from the server */
 			char server_response[256];
 			while(read(network_socket, &server_response, sizeof(server_response)) != 0) {
-					printf("%s", server_response);
+				printf("%s", server_response);
 			}
 			fflush(stdout);
 			printf("\n");
+			//printf("%s\n", history->queue[0]);
 
-		} else if (strcmp(client_message, "") == 0) {
-			printf("Nothing to send. please try again.\n");
-		} else {
-			send(network_socket, client_message, sizeof(client_message), 0);
-			persist = 0;
 		}	
 
 		/* close the socket */
@@ -126,7 +213,7 @@ int find_length(char *str) {
  */
 char * t_encrypt(char str[], int length) {
 	int i;
-	char * encrypted = (char *) malloc(length * sizeof(char *));
+	char *encrypted = (char *) malloc(length * sizeof(char *));
 	for(i = 0; i < length; i++) {
 		encrypted[i] = str[i] + ENCRYPT;
 	}
@@ -143,8 +230,56 @@ char * t_encrypt(char str[], int length) {
  */
 char * t_decrypt(char str[], int length) {
 	int i;
-	char * decrypted = (char *) malloc(length * sizeof(char *));
+	char *decrypted = (char *) malloc(length * sizeof(char *));
 	for(i = 0; i < length; i++) {
 		decrypted[i] = str[i] - DECRYPT;
+	}
+}
+
+/**
+ * Adds a given command to the provided history queue.
+ *
+ * char *addition: The command to be added.
+ * history_queue *history: The queue struct to add the command to.
+ */
+void add_command(char *addition, history_queue *history) {
+	int position = history->tail;
+	int i;
+
+	if(position == 0) {
+		history->queue[0] = addition;
+		history->tail++;
+	} else {
+		for(i = position; i > 0; i--) {
+			history->queue[i] = history->queue[i - 1];
+		}
+		history->queue[0] = addition;
+		if(position != 9) {
+			history->tail++;
+		}
+	}
+}
+
+/**
+ * Peeks at a command in the queue.
+ *
+ * int command: The command (provided between 1 to 10) to be peeked at.
+ * history_queue: The queue struct to get the command from.
+ *
+ * returns: The string representing the peeked command.
+ */
+char * peek_command(int command, history_queue *history) {
+	if(command >= 1 && command <= 10) {
+		char *peeked_command = (char *) malloc(find_length(history->queue[command - 1]));
+		peeked_command = history->queue[command - 1];
+		return peeked_command;
+	}
+	return NULL;
+}
+
+void print_history(history_queue *history) {
+	int i;
+	for(i = 0; i < history->tail; i++) {
+		printf("%s\n", history->queue[i]); 
 	}
 }

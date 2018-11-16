@@ -86,6 +86,7 @@ int main() {
 			close(client_socket);
 		} /* parent process */
 	       	else {
+
 			/* close client socket */
 			close(client_socket);
 		}
